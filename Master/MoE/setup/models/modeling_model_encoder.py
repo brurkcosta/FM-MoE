@@ -19,7 +19,7 @@ from setup.utils.custom_loss_function import moe_custom_loss
 
 os.environ["HF_HUB_DISABLE_PROGRESS_BARS"] = "1"
 os.environ["TRANSFORMERS_VERBOSITY"] = "error"
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 EXPERT_CLASS_MAP = {
     "Moirai":    MoiraiExpert,
