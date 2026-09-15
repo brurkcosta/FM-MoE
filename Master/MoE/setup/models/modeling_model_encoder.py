@@ -73,7 +73,6 @@ class TimeSeriesEncoder(nn.Module):
 
         # Per-instance normalisation — scale-invariant across different datasets
         # affine=True lets the model learn a post-norm rescale
-        self.instance_norm = nn.InstanceNorm1d(1, affine=True)
 
         # 1×1 bottleneck: projects 1 input channel → hidden_dim channels
         # GroupNorm instead of BatchNorm to avoid NaN with batch_size=1
@@ -135,7 +134,6 @@ class TimeSeriesEncoder(nn.Module):
         if x.dim() == 2:
             x = x.unsqueeze(1)                                    # (B, 1, L)
 
-        x = self.instance_norm(x)                                 # (B, 1, L)
         h = self.bottleneck(x)                                    # (B, hidden, L)
 
         branch_outs = [branch(h) for branch in self.branches]    # [(B, hidden, L) * n_kernels]

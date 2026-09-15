@@ -1,0 +1,12 @@
+RELATÓRIO DE AVALIAÇÃO - FM-MoE
+==================================================
+Séries avaliadas: 216
+Horizonte de previsão: 24 passos
+
+Métricas médias (todas as séries):
+  MAE  médio: 5704.8568
+  RMSE médio: 6843.0010
+  MAPE médio: 430.70%
+
+Melhor série: series_180 (MAE=0.0164)
+Pior série:   series_144 (MAE=119200.8351)
