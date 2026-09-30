@@ -103,8 +103,9 @@ class TimeSeriesEncoder(nn.Module):
 
         # MLP projection after Global Average Pooling
         total_channels = hidden_dim * (len(kernel_sizes) + 1)  # +1 for skip
+        self.pool_norm = nn.LayerNorm(3 * total_channels)
         self.proj = nn.Sequential(
-            nn.Linear(total_channels, out_dim),
+            nn.Linear(3 * total_channels, out_dim),
             nn.GELU(),
             nn.Dropout(p=0.1),
             nn.Linear(out_dim, out_dim),
@@ -140,9 +141,16 @@ class TimeSeriesEncoder(nn.Module):
         skip_out = self.skip_branch(h)                            # (B, hidden, L)
 
         combined = torch.cat(branch_outs + [skip_out], dim=1)    # (B, hidden*4, L)
-        pooled = combined.mean(dim=-1)                            # (B, hidden*4) — L collapses here
+        pooled = torch.cat(
+            [
+                combined.mean(dim=-1),
+                combined.std(dim=-1, unbiased=False),
+                combined.amax(dim=-1),
+            ],
+            dim=1,
+        )                                                        # (B, 3C)
 
-        return self.proj(pooled)                                  # (B, out_dim)
+        return self.proj(self.pool_norm(pooled))                 # (B, out_dim)
 
 
 # -------------------
@@ -488,6 +496,7 @@ def predict_from_model(
     horizon: int,
     top_k: int,
     use_noise,
+    norm: str = "std",
     device: str = "cpu",
     verbose: bool = True,
 ):
