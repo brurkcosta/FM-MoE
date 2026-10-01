@@ -101,11 +101,12 @@ class TimeSeriesEncoder(nn.Module):
             nn.GELU(),
         )
 
-        # MLP projection after Global Average Pooling
+        # Attention pooling: um score por passo de tempo
         total_channels = hidden_dim * (len(kernel_sizes) + 1)  # +1 for skip
-        self.pool_norm = nn.LayerNorm(3 * total_channels)
+        self.attn = nn.Conv1d(total_channels, 1, kernel_size=1)
+        self.pool_norm = nn.LayerNorm(total_channels)
         self.proj = nn.Sequential(
-            nn.Linear(3 * total_channels, out_dim),
+            nn.Linear(total_channels, out_dim),
             nn.GELU(),
             nn.Dropout(p=0.1),
             nn.Linear(out_dim, out_dim),
@@ -141,14 +142,8 @@ class TimeSeriesEncoder(nn.Module):
         skip_out = self.skip_branch(h)                            # (B, hidden, L)
 
         combined = torch.cat(branch_outs + [skip_out], dim=1)    # (B, hidden*4, L)
-        pooled = torch.cat(
-            [
-                combined.mean(dim=-1),
-                combined.std(dim=-1, unbiased=False),
-                combined.amax(dim=-1),
-            ],
-            dim=1,
-        )                                                        # (B, 3C)
+        w = torch.softmax(self.attn(combined), dim=-1)           # (B, 1, L), soma 1 em L
+        pooled = (combined * w).sum(dim=-1)                      # (B, C)    # (B, hidden*4)
 
         return self.proj(self.pool_norm(pooled))                 # (B, out_dim)
 

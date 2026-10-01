@@ -4,9 +4,9 @@ Séries avaliadas: 216
 Horizonte de previsão: 24 passos
 
 Métricas médias (todas as séries):
-  MAE  médio: 6017.9313
-  RMSE médio: 7248.9012
-  MAPE médio: 353.96%
+  MAE  médio: 5516.0348
+  RMSE médio: 6643.9507
+  MAPE médio: 147.09%
 
-Melhor série: series_71 (MAE=0.0294)
+Melhor série: series_47 (MAE=0.0074)
 Pior série:   series_144 (MAE=114926.6962)
